@@ -1,0 +1,74 @@
+#!/usr/bin/env python
+import os
+### TODO: Need to support whole paths FIXED
+### TODO: Create a class MyFolder/File to sort by size inside a List DONE
+### TODO: Check weird output in /opt dir the tor one
+### TODO: Print the size and give it a good format
+class MyFolder():
+    file_name=""
+    size=0.0
+    def __init__(self,fname,siz):
+        self.file_name = fname
+        self.size = siz
+    def __lt__(self,otherFolder):
+        return self.size < otherFolder.size
+    def __gt__(self,otherFolder):
+        return self.size > otherFolder.size
+    def __eq__(self,otherFolder):
+        return self.size == otherFolder.size
+    def __str__(self):
+        if  self.size < 1024 :
+            return " %-30s %10.2f Bytes" % (self.file_name,(float(self.size)))
+        elif self.size < 2**20:
+            return " %-30s %10.2f KB" % (self.file_name,(float(self.size)/1024))
+        elif self.size < 2**30:
+            return " %-30s %10.2f MB" % (self.file_name,(float(self.size)/(2**20)))
+        else :
+            return " %-30s %10.2f GB" % (self.file_name,(float(self.size)/(2**30)))
+        #return self.file_name
+
+    #def getSize():
+    #    if  self.size < 1024 :
+    #        print " %-30s %10.2f Bytes" % (self.filename,(float(self.size)))
+    #    elif self.size < 2**20:
+    #        print " %-30s %10.2f KB" % (self.filename,(float(self.size)/1024))
+    #    elif self.size < 2**30:
+    #        print " %-30s %10.2f MB" % (self.filename,(float(self.size)/(2**20)))
+    #    else :
+    #        print " %-30s %10.2f GB" % (self.filename,(float(self.size)/(2**30)))
+
+
+
+def get_size(start_path = '.'):
+    all_files = []
+    for dirpath in os.listdir(start_path):
+
+        ff_size = 0
+        line = ""
+        if os.path.isdir(dirpath):
+            line="d "
+            for dp,dnames,fnames in os.walk(dirpath):
+                for fname in fnames:
+                    fp = os.path.join(dp,fname)
+                    try:
+                        #print "Called from IF"
+                        ff_size += os.path.getsize(fp)
+                    except IOError as e:
+                        print e
+                    except Exception as d:
+                        print d 
+        else:
+            try:
+                ff_size += os.path.getsize(dirpath)
+            except IOError as e:
+                print e
+            except Exception as d:
+                print d 
+        thisFile = MyFolder(dirpath,ff_size)
+        all_files.append(thisFile)
+    all_files.sort(reverse=True)
+    for fi in all_files:
+        print fi
+
+get_size()                
+#print (float(get_size())/1024/1024/1024),"GB"
