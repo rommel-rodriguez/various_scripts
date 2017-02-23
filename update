@@ -1,0 +1,15 @@
+#!/bin/bash
+### Simple script to update the software in the system
+upgrade(){
+    if [ "$(id -u)" != "0" ]; then
+        echo "you must be superuser to run this script">&2 
+        ## '>&2' sends message to standard error instead of standard output
+        exit 1
+    else
+        sudo apt-get update
+        sudo apt-get -y upgrade
+        sudo apt-get autoremove
+        exit 0
+    fi
+}
+upgrade

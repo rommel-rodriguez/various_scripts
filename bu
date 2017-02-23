@@ -1,0 +1,43 @@
+#!/bin/bash
+file=
+prog_name=$(basename "$0")
+send_backup_to=
+usage(){
+    echo "Script formate error, usage:  " >&2
+    echo "$prog_name file_name" >&2 
+}
+make_backup(){
+    if cp $file "$file.backup";then
+        echo "Backup file $file.backup created successfully"
+    fi
+}
+#### Main
+if [ $# -ne 1 ]; then
+    usage
+    exit 1
+else
+    file="$1"
+    ans=""
+    if [ -f "$file" ]; then
+       if [ -f "$file.backup" ]; then
+           echo -n "Do you wish to overwrite the last backup? y/n > "
+           read ans
+           if [ $ans = "y" -o $ans = "Y" ]; then
+              make_backup
+#              echo "Backup file $file.backup created successfully"
+              exit 0
+           else
+              echo "Failed to create new backup" >&2
+              exit 1
+           fi
+       else
+           make_backup
+#           echo "Backup file $file.backup created successfully"
+           exit 0
+       fi
+    else
+        echo "The file $file does not exist in the current directory $PWD"
+	echo "Failed to create new backup" >&2
+        exit 1
+    fi
+fi
