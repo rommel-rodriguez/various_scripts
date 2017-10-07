@@ -5,6 +5,16 @@
 wallpaper_dir_path=/media/shadowthrone/seven_cities/wallpapers/
 file_path="dsfadsf "
 theme_folder="*"
+bus_address=
+get_dbus_address(){
+    if [ ! -z $DBUS_SESSION_BUS_ADDRESS ]; then
+        session_pid=$(pgrep "mate-session" -u "shadowthrone")
+        exp=$(cat /proc/$session_pid/environ | grep -z "^DBUS_SESSION_BUS_ADDRESS=")
+        #DBUS_SESSION_BUS_ADDRESS="$exp"
+        export "$exp"
+        echo $bus_address
+    fi
+}
 ### echo "The randomly-selected file is: $path"
 validate_dir(){
     if [ ! -d "$1" ]; then
@@ -28,6 +38,10 @@ usage(){
 }
 
 ####### Main ########
+get_dbus_address
+echo "Outside Function:" $bus_address
+export $bus_address
+
 validate_dir "$wallpaper_dir_path"
 case $# in
     0) get_random_theme
