@@ -10,13 +10,17 @@ usage(){
     echo "Usage: $program"
 }
 ####### Main
-if [ $UID -ne 0 ]; then
-   echo "Only root can execute this script" 1>&2
-   exit 1
-fi
+#if [ $UID -ne 0 ]; then
+#   echo "Only root can execute this script" 1>&2
+#   exit 1
+#fi
 if [ $# -ne 0 ]; then
    usage
    exit 1
 fi
 
 clean
+
+if [ $? -eq 0 ];then
+    echo "Last Ram cleansing at: $(date)" > /home/shadowthrone/bin/cram.log
+fi
