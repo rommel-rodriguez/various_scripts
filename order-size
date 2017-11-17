@@ -1,0 +1,18 @@
+#!/bin/bash
+#echo "$(ls --file-type)"  | xargs du -sh 2>/dev/null | sort --reverse --human-numeric-sort 
+#ls --file-type  | head --lines=20  | xargs  --delimiter='\n' du -sh  #| sort --reverse --human-numeric-sort 
+#ls --file-type    | xargs  --delimiter='\n' du -sh  #| sort --reverse --human-numeric-sort 
+
+items="$(ls --file-type)"
+measured_items=""
+while read -r item; do
+    #measured_items="$(echo "$measured_items")$(du --summarize --human-readable "$item")"
+    measured_items=$(cat <<-__EOF__
+$measured_items
+$(du  --summarize --human-readable "$item" 2>/dev/null)
+__EOF__
+)
+done <<< "$items"
+
+#echo "$measured_items"
+echo "$measured_items" | sort --reverse --human-numeric-sort
