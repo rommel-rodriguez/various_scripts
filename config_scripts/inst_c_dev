@@ -1,0 +1,19 @@
+#!/bin/bash
+
+sudo apt-get install -y gcc clang gdb # Compilers and debugger
+sudo apt-get install -y valgrind # Detect memory leakages 
+sudo apt-get install -y binutils # Need the gprof profiler utility in there 
+
+# Also needed
+# make, pkg-config, doxygen
+# Requiered software packages:
+# libcURL, libGlib, libGSL, libSQLite3, libXML2 Install both normal and -dev or -devl version of
+# this packages
+sudo apt-get install -y libcurl3 libcurl3-dbg
+sudo apt-get install -y libgsl*
+sudo apt-get install -y libsqlite3-0 libsqlite3-dev 
+sudo apt-get install -y libxml2*
+
+
+# MORE:
+sudo apt-get install -y exuberant-ctags cscope

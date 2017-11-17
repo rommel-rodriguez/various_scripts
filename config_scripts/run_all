@@ -1,0 +1,11 @@
+#!/bin/bash
+
+install_all(){
+    programs=$(ls | grep "^inst_") 
+    #echo $programs
+    for program in $programs; do
+        ./$program
+    done
+}
+
+install_all

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# We need the following to compile a 32 bit program using gcc in a
+# 64 bit host pc
+
+sudo apt-get install gcc-multilib g++-multilib
