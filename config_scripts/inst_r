@@ -1,0 +1,10 @@
+#!/bin/bash
+
+add_r_rep(){
+    # For Ubuntu Xenial(16.04) and derivatives only.
+    sudo echo "deb http://cran.rstudio.com/bin/linux/ubuntu xenial/" | sudo tee -a /etc/apt/sources.list
+    gpg --keyserver keyserver.ubuntu.com --recv-key E084DAB9
+    gpg -a --export E084DAB9 | sudo apt-key add -
+}
+
+add_r_rep && sudo apt-get install -y r-base r-base-dev r-base-html r-doc-html 

@@ -9,6 +9,7 @@ sudo apt-get install -y binutils # Need the gprof profiler utility in there
 # Requiered software packages:
 # libcURL, libGlib, libGSL, libSQLite3, libXML2 Install both normal and -dev or -devl version of
 # this packages
+sudo apt-get install pkg-config doxygen cmake ycmd graphviz texlive-extra-utils
 sudo apt-get install -y libcurl3 libcurl3-dbg
 sudo apt-get install -y libgsl*
 sudo apt-get install -y libsqlite3-0 libsqlite3-dev 
