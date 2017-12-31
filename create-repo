@@ -1,0 +1,37 @@
+#!/bin/bash
+
+repo_dir='/home/svn'
+new_repo=''
+
+if [ ! -d "$repo_dir" ]; then
+    echo "Error svn repositories folder $repo_dir, does NOT exist."
+    echo "Terminating the script."
+    exit 1
+fi
+
+set_repo(){
+    sudo mkdir "$repo_dir/$new_repo" && \
+    sudo svnadmin create "$repo_dir/$new_repo" && \
+    sudo chown -R www-data:subversion "$repo_dir/$new_repo" && \
+    sudo chmod -R g+rws "$repo_dir/$new_repo" && \
+    echo "Repo: $new_repo add successfully."
+}
+
+repo_exists(){
+    if [ -d "$repo_dir/$new_repo"  ];then
+        echo "Folder already exists delete or check the project!!!!!!!"
+        exit 1
+    fi
+    return 0
+}
+
+if [ $# -ne 1 ];then
+    echo "The script takes one and only one argument"
+    echo -e "\t\t $(basename $0) <name of new repo>"
+    exit 1
+fi
+
+new_repo="$1"
+
+repo_exists && \
+set_repo

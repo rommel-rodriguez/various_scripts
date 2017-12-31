@@ -7,4 +7,4 @@ add_r_rep(){
     gpg -a --export E084DAB9 | sudo apt-key add -
 }
 
-add_r_rep && sudo apt-get install -y r-base r-base-dev r-base-html r-doc-html 
+add_r_rep && sudo apt-get update && sudo apt-get install -y r-base r-base-dev r-base-html r-doc-html 
