@@ -8,8 +8,12 @@ upgrade(){
     else
         sudo apt-get update
         sudo apt-get -y upgrade
-        sudo apt autoremove
-        exit 0
+        return 0
     fi
 }
-upgrade
+clean_syscache(){
+    sudo apt autoremove
+    sudo apt-get clean
+    sudo apt-get autoclean
+}
+upgrade && clean_syscache
