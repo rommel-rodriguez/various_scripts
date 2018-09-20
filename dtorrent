@@ -1,0 +1,96 @@
+#!/bin/bash
+### Script used to deleted all .torrent files from a tree structure with a
+### folder as the root of the tree
+################### VARIABLES #############################
+search_folder="/media/shadowthrone"
+torrent_files=""
+SCRIPT_NAME=$(basename "$0")
+interactive="off"
+################### FUNCTIONS #############################
+getTorrentNames(){
+    torrent_files=$(find $search_folder -type f -name '*.torrent')
+}
+printTorrents(){
+    echo "list of the torrent files to be deleted: "
+    echo  "$torrent_files"
+}
+deleteTorrents(){
+    while read line;do
+        if [ -w "$line" ];then
+            rm -v "$line"
+        fi
+    done <<< "$torrent_files" 
+}
+usage(){
+    echo "This program is used to deleted all .torrent file from a tree structure"
+    echo "starting with a folder as the root of the tree"
+    echo "Usage:"
+    printf "\t%s [-h | -d treeRootDirectory | -i]\n" "$SCRIPT_NAME"
+}
+validateRoot(){
+    if [ -d "$search_folder" ];then
+        return 0
+    else
+        return 1
+    fi
+}
+
+###################    MAIN    #############################
+if [ $# -eq 0 ];then
+    # echo "Number of arguments equals zero"
+    getTorrentNames
+    deleteTorrents
+else
+    while [ $1 != " " ];do
+        echo "Processing argument $1"
+        case $1 in
+            -h) usage 
+                exit 0
+                ;;
+            -d) shift
+                search_folder="$1"
+                ;;
+            -i) interactive="on"
+                shift
+                ;;
+            *)  echo -e "\t Invalid option for this script"
+                usage
+                exit 1
+                ;;
+        esac
+    done
+fi
+
+case $interactive in
+    "off")  getTorrentNames
+            deleteTorrents
+            exit 0
+            ;;
+    "on")   answer="y"
+            while [ $answer = "y" ];do
+                read -p "Enter the tree root folder > "
+                search_folder="$REPLY"
+                if validateRoot; then
+                    getTorrentNames
+                    answer="n"
+                else
+                    echo "The folder specified ($search_folder) " 
+                    echo "either does not exist or is not a folder"
+                    read -p "Do you wish to try with another folder?(y/n) > " answer
+                    if [ $answer != "y" ];then
+                        exit 1
+                    fi
+                fi 
+            done
+            printTorrents
+            read -p "Do you wish to delete this files? y/n > "
+            if [ $REPLY = "y" ];then 
+                deleteTorrents
+                echo "Files Deleted Succesfully"
+                exit 0
+            else
+                echo "No file was deleted. Script Terminated"
+                exit 1
+            fi
+            ;;
+esac
