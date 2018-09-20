@@ -1,0 +1,44 @@
+#!/usr/bin/env perl
+
+use 5.016;
+use warnings;
+use autodie;
+use Text::Tabs;
+
+$tabstop = 4;
+my $users_file = "/etc/passwd";
+my $line_counter;
+open my $fh, "<", $users_file;
+
+say "Users with access to command shell in file $users_file:";
+while(<$fh>){
+    chomp;
+    $line_counter += 1;
+    say " "x4 . "Line $line_counter: '$_'" if /bash/;
+}
+
+say "Passwords on this system use shadow file" if( -e "/etc/shadow" and -f "/etc/shadow");
+
+my @file_info = stat("/etc/shadow");
+my %info_hash = (
+    dev => $file_info[0],
+    ino => $file_info[1],
+    mode => $file_info[2],
+    nlink => $file_info[3],
+    uid => $file_info[4],
+    gid => $file_info[5],
+    rdev => $file_info[6],
+    size => $file_info[7],
+    atime => $file_info[8],
+    mtime => $file_info[9],
+    ctime => $file_info[10],
+    blksize => $file_info[11],
+    blocks => $file_info[12]
+);
+
+#say %info_hash;
+
+while(my($key, $value) = each %info_hash){
+    say "$key ==>   $value";
+}
+

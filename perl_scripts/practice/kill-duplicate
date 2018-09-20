@@ -1,0 +1,182 @@
+#!/usr/bin/env perl
+use Modern::Perl '2015';
+use autodie;
+use Getopt::Std;
+use File::Path; # Needed to get rmtree
+use File::Find;
+use File::Basename;
+use List::Util qw(sum);
+use utf8;
+### TODO: add -f option for check only files and recursive option to search
+### for files in subfolders.
+my %options = ();
+getopts("k:c:rR", \%options);
+
+my $keep_dir = '/here/goes/the/your/keep/directory';
+my $check_dir = '';
+my $script_name = $0;
+$script_name =~ s/^\.\///; # Removes the ./ from the script's name.
+my $num_args = $#ARGV + 1;
+my $removal_flag = 0;
+my $only_files = 0;
+my $recursive = 0;
+my %recursive_directories =  ();
+my %recursive_result_hash= ();
+#my $compr_pattern = qr"(\.rar|\.zip|\.7z)$";
+my $compr_pattern = qr"(\.rar|\.zip|\.7z)$";
+my @exclude_patterns = (
+    qr"new.*folder",
+    qr"(?i)nueva.*carpeta",
+    qr"(?i)^new[_\s]?\d*",
+    qr"^.{0,4}$"
+);
+
+$keep_dir = $options{k} if defined($options{k});
+$check_dir = $options{c} if defined($options{c});
+$check_dir =~ s/\/$//;
+$removal_flag = 1 if defined($options{r});
+$recursive = 1 if defined($options{R});
+
+sub usage{
+    print "Usage:\n";
+    print "\t$script_name -c check_directory [ -k keep_directory ]\n";
+    die "Terminating Script.\n";
+}
+
+=pod
+=item is_duplicate 
+    &is_duplicate($keep_file, $check_file);
+    returns True if $check_file should be removed, False otherwise.
+=cut
+
+sub is_duplicate{
+    my ($keep_file, $check_file) = @_;
+    return 1 if  $keep_file eq $check_file;
+    #$check_file =~ s/(\.rar|\.zip|\.7z)$//;
+    $check_file =~ s/$compr_pattern//; 
+    ## I am not taking here into account that the same file could have different 
+    ## extensions.
+    return 1 if  $keep_file eq $check_file;
+    return 0;
+}
+
+sub check_dirs{
+    my ($kdir, $cdir) = @_;
+    print "$kdir is not a directory\n" if ! -d $kdir;
+    print "$cdir is not a directory\n" if ! -d $cdir;
+    -d $kdir and -d $cdir;
+}
+
+=pod
+=item get_file_normal
+    Retrieves all files and directories in anormal 1 level depth search of the
+    $cdir directory.
+=cut
+
+sub get_files_normal{
+    my ($cdir, ) = @_;
+    opendir my $cdir_dh, "$cdir" or die "Cannot Open Directory $cdir\n";
+    my @all_files = readdir $cdir_dh;
+    return @all_files;
+}
+
+sub find_callback{
+    ($recursive_directories{"${\(basename($File::Find::dir))}"} = "$File::Find::dir" ) &&
+    /$compr_pattern/ && 
+    ($recursive_result_hash{"$_"} = "$File::Find::name"); 
+
+}
+
+sub get_files_recursive{
+    my ($cdir, ) = @_;
+    my @directories = ();
+    push(@directories, $cdir);
+    find(\&find_callback, @directories);
+    return keys %recursive_result_hash;
+}
+
+=pod
+=item get_duplicates
+    Returns a list of absolute paths to files that must be removed.
+=cut
+
+sub get_duplicates{
+    #TODO: REMOVE . and .. folders form removal or we gonna have HELL HERE.
+    my ($kdir, $cdir) = @_;
+
+    opendir my $kdir_dh, "$kdir" or die "Cannot Open Directory $test_dir\n";
+
+    my @remove_list = ();
+    my @potential_files = $recursive != 1 ?  &get_files_normal($cdir) : &get_files_recursive($cdir) ;
+    ! $recursive ? splice @potential_files, 0,2 : 1; ### Removes files . and .. from list.
+    foreach my $keep_file(readdir $kdir_dh){
+        if($keep_file ~~ @exclude_patterns){
+            next;
+        }
+        if($recursive  && exists $recursive_directories{"$keep_file"}){
+            my $folder_path = "$recursive_directories{$keep_file}";
+            push(@remove_list, "$folder_path");
+            next;
+        }
+        my $file_counter = 0;
+        foreach my $check_file(@potential_files){
+            $file_counter += 1; 
+            if( &is_duplicate($keep_file, $check_file) ){
+                #print "$check_dir/$check_file\n";
+                if(! $recursive ){
+                    push(@remove_list, "$check_dir/$check_file");
+                }else{
+                    push(@remove_list, "$recursive_result_hash{$check_file}");
+                }
+                last;
+            }
+        }
+    }
+    @remove_list;
+}
+
+sub print_filelist{
+    my (@files,) = @_;
+    foreach my $file(@files){
+        print "$file\n";
+    }
+}
+
+sub delete_files{
+    my (@files,) = @_;
+    my $num_files = @files; 
+    print "Atempting to remove $num_files Files...\n";
+    foreach my $file(@files){
+        if ( -f "$file"){
+            unlink "$file" or die "Error Removing File: $file\n";
+        }elsif(-d "$file"){
+            rmtree "$file" or die "Error Removing Directory: $file\n";
+        }
+    }
+    print "===========> All files have been removed\n";
+}
+
+sub measure_total{
+    my (@files,) = @_;
+    #my $command = "";
+    my @sizes_temp = map { qx/du -s "$_"/ } @files;
+    #print @sizes_temp;
+    #die "Testing shell command";
+    my @sizes = map { m/^(\d*)\s+(.*)/; $1 } @sizes_temp; ### Second group would be the filename.
+    my $total_size = sum(@sizes); ## In Kilo Bytes
+    $total_size = $total_size / 2**10; ## In MB
+    return $total_size
+}
+
+sub main{
+    &usage if ! defined($options{c}) ; 
+    die "DIR ERROR: Terminating Script\n" if ! &check_dirs($keep_dir, $check_dir);
+    my @removal_list = &get_duplicates($keep_dir, $check_dir);
+    my $total_to_remove = @removal_list;
+    my $total_size = &measure_total(@removal_list);
+    print "$total_to_remove Tagged for removal, totaling $total_size MB:\n";
+    &print_filelist(@removal_list);
+    &delete_files(@removal_list) if  $removal_flag;
+}
+
+&main;
