@@ -1,0 +1,99 @@
+#!/usr/bin/env python3
+import sys
+import re
+import subprocess
+import threading
+import queue
+import urllib
+import urllib.request as urllib2 
+
+from html.parser import HTMLParser
+
+class MITParser(HTMLParser):
+    def __init__(self):
+        HTMLParser.__init__(self)
+        self.pattern = re.compile(r'.*medialink.*')
+        self.lessonLinks = queue.Queue() 
+        self.mitDomain = 'https://ocw.mit.edu'
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "a":
+            lessonLink = ""
+            isLink = False
+            for name, value in attrs:
+                if name == "href":
+                    lessonLink = value
+                if name == "class" and self.pattern.match(value):
+                    isLink = True
+            if isLink :
+                self.lessonLinks.put(self.mitDomain + lessonLink)
+                
+
+class MITParserSecondLevel(HTMLParser):
+    def __init__(self):
+        HTMLParser.__init__(self)
+        self.audioLink = "" 
+        self.pattern = re.compile(r'.*\.MP3$')
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "a":
+            for name, value in attrs:
+                if name == "href":
+                    if self.pattern.match(value):
+                        self.audioLink = value
+
+def getPageUTF8( url ):
+    headers = {}
+    #user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:19.0) Gecko/20100101 Firefox/19.0"
+    #user_agent = 'Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:55.0) Gecko/20100101 Firefox/55.0'
+    user_agent = r'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:55.0) Gecko/20100101 Firefox/55.0'
+
+    headers["User-Agent"] = user_agent
+    opener = urllib2.build_opener()
+    request = urllib2.Request(url, headers = headers)
+    response = opener.open(request)
+    #print(response.read().decode("utf-8"))
+    #assert False, "Testing pagecoding"
+    return response.read().decode("utf-8")
+
+
+def downloaderWorker(linkQueue, workerNumber):
+    print("Worker %d Started" % workerNumber)
+    completedProcessObject = subprocess.run(["which", "wget"])
+    if completedProcessObject.returncode == 0:
+        while not linkQueue.empty() :
+            currentLink = linkQueue.get()
+
+            #print('Test Page to analyze is: {}'.format(currentLink))
+            #print(getPageUTF8(currentLink))
+            #assert False, "Test segment"
+
+            secondLevelParser = MITParserSecondLevel() 
+
+
+            secondLevelParser.feed(getPageUTF8(currentLink))
+            audioLink = secondLevelParser.audioLink
+            print("Got audio link: {}".format(audioLink))
+
+            print("Worker %d Getting %s" % (workerNumber, audioLink))
+            completedProcessObject = subprocess.run(["wget", audioLink ])
+            if completedProcessObject.returncode == 0:
+                print("Success Got %s" % currentLink)
+    else:
+        print("This script need audio-dl to work")
+        sys.exit(1)
+
+if __name__ == '__main__' :
+    if not len(sys.argv[1:]) ==  1 :
+        print("Need an URL to scan for MIT Lesson Links")
+        sys.exit(1)
+    url = sys.argv[1]
+    mitParser = MITParser()
+    mitParser.feed(getPageUTF8( url ))
+    linkQueue = mitParser.lessonLinks
+    workers = []
+    for i in range(0, 8):
+       worker = threading.Thread(target = downloaderWorker, args = (linkQueue, i)) 
+       worker.start()
+       workers.append(worker)
+
