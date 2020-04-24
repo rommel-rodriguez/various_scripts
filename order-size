@@ -3,7 +3,7 @@
 #ls --file-type  | head --lines=20  | xargs  --delimiter='\n' du -sh  #| sort --reverse --human-numeric-sort 
 #ls --file-type    | xargs  --delimiter='\n' du -sh  #| sort --reverse --human-numeric-sort 
 
-items="$(ls --file-type)"
+items="$(ls --all --file-type)" ### TODO: Exclude . and .. from report. 
 measured_items=""
 while read -r item; do
     #measured_items="$(echo "$measured_items")$(du --summarize --human-readable "$item")"
