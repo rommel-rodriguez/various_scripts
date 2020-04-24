@@ -1,0 +1,4 @@
+#!/bin/bash
+# First Clone the Root folder using git clone
+# That will download everything that is not a submodule
+git submodule update --init --recursive # This Beauty will download all submodules

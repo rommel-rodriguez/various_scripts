@@ -1,0 +1,8 @@
+#!/bin/bash
+
+sudo apt-get install nmap
+sudo apt-get install aircrack-ng
+
+## Forensic tools
+sudo  apt-get install -y forensics-all
+sudo apt-get install -y libimage-exiftool-perl

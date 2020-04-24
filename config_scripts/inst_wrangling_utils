@@ -1,0 +1,4 @@
+#!/bin/bash
+
+sudo pip install pandas xlrd openpyxl
+sudo pip3 install pandas xlrd openpyxl

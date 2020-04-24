@@ -1,0 +1,7 @@
+#!/bin/bash
+### Install perfomance assessment tools
+## Install perf and other assessment tools
+sudo apt install -y linux-tools-common
+## Install iotop  and other monitoring tools 
+sudo apt install -y sysstat 
+

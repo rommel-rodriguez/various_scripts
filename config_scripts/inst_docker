@@ -1,0 +1,39 @@
+#!/bin/bash
+inst_requirements(){
+    sudo apt-get -y install \
+        apt-transport-https \
+        ca-certificates \
+        curl \
+        software-properties-common
+}
+
+add_docker_gpgkey_and_repo(){
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+    sudo add-apt-repository \
+    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+    $(lsb_release -cs) \
+    stable"
+}
+inst_docker(){
+    # There is an error here while updating in linux mind serena
+    # we need to go to /etc/apt/sources.list.d/additional-repositories.list
+    # and change in docker's config line 'serena'  by xenial, Automate this later.
+    sudo apt-get update && \
+    sudo apt-get install -y docker-ce
+}
+
+inst_docker_compose(){
+    ### Do NOT install docker-compose from Ubuntu's repo.
+    ### And use sudo to run docker-compose or else an env variable is missing.
+    sudo curl -L "https://github.com/docker/compose/releases/download/1.22.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    sudo chmod +x /usr/local/bin/docker-compose
+}
+
+linux_postinstallation(){
+    # Post installation step for easy of use on linux.
+    sudo groupadd docker
+    sudo usermod -aG docker $USER
+}
+
+inst_requirements && add_docker_gpgkey_and_repo && \
+    inst_docker && inst_docker_compose

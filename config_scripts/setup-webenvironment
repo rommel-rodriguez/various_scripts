@@ -1,0 +1,48 @@
+#!/bin/bash
+#### Only valid for Ubuntu 16.04 and it's derivatives.
+
+add_mariadb_mirror(){
+    sudo apt-get install -y software-properties-common &&\
+    sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8 &&\
+    sudo add-apt-repository 'deb [arch=amd64,arm64,i386,ppc64el] http://mirror.ufscar.br/mariadb/repo/10.3/ubuntu xenial main'
+    if [ $? -eq 0 ]; then
+        echo "[*] Mariadb Mirror for  Ubuntu 16.04 added."
+    else
+        return 1
+    fi
+
+}
+
+install_mariadb(){
+    sudo apt update &&\
+    sudo apt install -y mariadb-server mariadb-client
+}
+install_nginx(){
+    sudo apt-get update &&\
+    sudo apt-get -y install nginx
+}
+
+install_php7(){
+    sudo apt-get install -y php-fpm php-mysql
+}
+
+post_install(){
+    fpm_config='/etc/php/7.0/fpm/php.ini'
+    pattern=';.*(cgi\.fix_pathinfo)'
+    replacement_pattern='\1=0'
+    sed -n --regexp-extended --expression='/^;(cgi\.fix_pathinfo)/p' "$fpm_config"
+    sudo sed --in-place --regexp-extended --expression='s/^;(cgi\.fix_pathinfo)/\1=0/g'  "$fpm_config"
+}
+configure_nginx(){
+    echo "Not implemented"
+}
+
+main(){
+    install_nginx 
+    add_mariadb_mirror && install_mariadb
+    install_php7
+}
+
+########################## Excecution ############################
+main
+

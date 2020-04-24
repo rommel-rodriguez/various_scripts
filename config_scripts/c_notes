@@ -1,0 +1,14 @@
+Useful Compilation Flags:
+
+-g : Adds symbols for debugging, should ALWAYS be add
+-std=gnu11 : Allow code conforming C11 and POSIX standards 
+                otherwise gcc will count certain now valid bits of syntax as invalid.
+
+-std=gnu99 : ONLY if you system predates C11, which is equivalent to using the
+                c99 command line compiler(just type 'man c99'), on make files
+                just set cc=c99
+
+-O3 : optimization level 3. Change it to -O0 if the the code is so optimized, 
+        you can NOT understand it anymore while debugging.
+
+-Wall : adds compiler warnings. Must ALWAYS BE ADD

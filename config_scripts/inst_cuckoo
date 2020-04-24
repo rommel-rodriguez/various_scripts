@@ -1,0 +1,40 @@
+#!bin/bash
+install_requirements(){
+    sudo apt-get update
+    sudo apt-get install python python-pip python-dev libffi-dev libssl-dev
+    sudo apt-get install python-virtualenv python-setuptools
+    sudo apt-get install libjpeg-dev zlib1g-dev swig
+    sudo apt-get install postgresql libpq-dev
+    sudo apt-get install qemu-kvm libvirt-bin ubuntu-vm-builder bridge-utils python-libvirt
+}
+
+install_virtualbox(){
+    echo deb http://download.virtualbox.org/virtualbox/debian xenial contrib | sudo tee -a /etc/apt/sources.list.d/virtualbox.list
+    wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
+    sudo apt-get update
+    sudo apt-get install virtualbox-5.1
+}
+
+config_tcpdump(){
+    sudo apt-get install tcpdump apparmor-utils
+    sudo aa-disable /usr/sbin/tcpdump
+    if [ -z "$(which setcap)"]; then sudo apt-get install libcap2-bin;fi
+    sudo setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
+}
+
+create_cuckoo_user(){
+    ## TODO:
+    sudo adduser cuckoo
+    sudo usermod -a -G vboxusers cuckoo
+    sudo usermod -a -G libvirtd cuckoo
+}
+
+
+############## MAIN ####################
+#install_requirements
+#install_virtualbox    
+#config_tcpdump
+create_cuckoo_user
+
+
+
