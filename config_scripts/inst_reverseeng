@@ -1,0 +1,5 @@
+#!/bin/bash
+#### Some usefull tools for Window's Malaware reverse engineering
+
+sudo apt install -y wxhexeditor
+sudo apt install -y --install-suggests radare2  
