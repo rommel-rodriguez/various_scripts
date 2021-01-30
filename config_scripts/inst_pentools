@@ -6,3 +6,25 @@ sudo apt-get install aircrack-ng
 ## Forensic tools
 sudo  apt-get install -y forensics-all
 sudo apt-get install -y libimage-exiftool-perl
+
+## Netfilter Framework Tools
+sudo apt-get install -y nfdump nfdump-dbg
+
+## Simulate Keyboard inpus from a X11 session
+sudo apt-get install -y xdotool 
+## sudo apt-get install -y xautomation ### includes xdotool + more tools
+
+### Enumerate subdomains
+sudo apt-get install -y knockpy
+
+### Packet capturing tools
+sudo apt-get install -y wireshark tshark
+
+### View very large files
+sudo apt-get install -y hexedit
+
+### Additional packages (not maintained by debian), requiers considerable disk space
+## sudo apt-get install -y forensics-extra
+
+
+
