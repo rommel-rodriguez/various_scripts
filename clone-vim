@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 #### Add logic to install powerline from here
 bud="${HOME}/vim_backup" # Back Up Directory
-
+## TODO: Find out if the right vim is installed in the system
 pushd ${HOME}
-if [[ -f ./.vimrc -a ! -d ${bud} ]];then
+if [ -f ./.vimrc -a ! -d ${bud} ];then
     echo "Creating back up directory ..."
     until [ -d ${bud} -a ! -f ./.vimrc -a  ! -d ./.vim ];do
         mkdir ${bud}
@@ -13,6 +13,9 @@ if [[ -f ./.vimrc -a ! -d ${bud} ]];then
 else
     echo " .vimrc does not exits or backup Folder already exists, terminating the script continuing ..."
 fi
+# if [ ! -d ${HOME}/.vim ]; then
+## TODO: Find the way to make vim create its own .vim folder in case it does not 
+## exists yet.
 git clone https://github.com/JaghutTyrant/dotvim.git "${HOME}/.vim"
 ln -s -b ${HOME}/.vim/vimrc ${HOME}/.vimrc
 ln -s -b ${HOME}/.vim/gvimrc ${HOME}/.gvimrc

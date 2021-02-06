@@ -1,8 +1,0 @@
-
-For cuckoo sanbox set up we have made the following things related to tcdump:
-    first we installed the mac AppArmor.
-        $ sudo apt-get install tcpdump apparmor-utils
-    then we disable the AppArmor profile for tcpdump
-        $ sudo aa-disable /usr/sbin/tcpdump
-    Tcpdump requires root privileges, but since you don’t want Cuckoo to run as root you’ll have to set specific Linux capabilities to the binary:
-        $ sudo setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
