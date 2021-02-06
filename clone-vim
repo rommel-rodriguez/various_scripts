@@ -25,6 +25,7 @@ installYCM(){
 	# Ubuntu 16.04 and later
 	sudo apt install build-essential cmake python3-dev 
 	pushd ${HOME}/.vim/bundle/YouCompleteMe
+    ## TODO: ycm does not seem to install on ubuntu20.04-based systems ...
 	python3 install.py --clang-completer	
 	popd
 }
