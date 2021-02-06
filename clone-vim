@@ -2,6 +2,7 @@
 #### Add logic to install powerline from here
 bud="${HOME}/vim_backup" # Back Up Directory
 ## TODO: Find out if the right vim is installed in the system
+## TODO: IF current version does not work, modify ycm's repo-url to ycm-core
 pushd ${HOME}
 if [ -f ./.vimrc -a ! -d ${bud} ];then
     echo "Creating back up directory ..."
@@ -25,6 +26,9 @@ installYCM(){
 	# Ubuntu 16.04 and later
 	sudo apt install build-essential cmake python3-dev 
 	pushd ${HOME}/.vim/bundle/YouCompleteMe
+    ### Some submodules have themselves many submodules
+    git submodule update --init --recursive
+    ### TODO: may need to add here clang libraries for installation
     ## TODO: ycm does not seem to install on ubuntu20.04-based systems ...
 	python3 install.py --clang-completer	
 	popd
