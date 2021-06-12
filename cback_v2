@@ -2,10 +2,32 @@
 # Script to change background selecting a random file(image) as back
 # background image
 #wallpaper_dir_path=~/wallpapers
+test_img='/media/shadowthrone/seven_cities/wallpapers/Halo_4/2_halo4.jpg'
 wallpaper_dir_path=/media/shadowthrone/seven_cities/wallpapers/
 file_path="dsfadsf "
 theme_folder="*"
 bus_address=
+### GSettings configurations
+schema=""
+key=""
+## TODO: cinnamon schema need an URI with a protocol prefix like file:// or so
+## need to see if mate's schema works with this protocol or maybe I will have to
+## add a 'protocol' variable or 'prefix' for the image name/URI
+set_schema_key(){
+    case "$DESKTOP_SESSION" in
+        mate) 
+            schema="org.mate.background"  
+            key="picture-filename"
+            ;;
+        cinnamon) 
+            schema="org.cinnamon.desktop.background"
+            key="picture-uri"
+            ;;
+        *) echo "[ERROR]: Desktop Environment NOT supported" >&2
+            exit 1
+            ;;
+    esac
+}
 validate_dir(){
     if [ ! -d "$1" ]; then
         echo "The '$1' folder does not exist" 1>&2
