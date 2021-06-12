@@ -2,8 +2,8 @@
 # Script to change background selecting a random file(image) as back
 # background image
 #wallpaper_dir_path=~/wallpapers
-test_img='/media/shadowthrone/seven_cities/wallpapers/Halo_4/2_halo4.jpg'
-wallpaper_dir_path=/media/shadowthrone/seven_cities/wallpapers/
+#test_img='/media/shadowthrone/seven_cities/wallpapers/Halo_4/2_halo4.jpg'
+wallpaper_dir_path=/media/"${USER}"/seven_cities/wallpapers/
 file_path="dsfadsf "
 theme_folder="*"
 bus_address=
@@ -11,7 +11,9 @@ bus_address=
 schema=""
 key=""
 key_prefix=""
-## TODO: cinnamon schema need an URI with a protocol prefix like file:// or so
+my_display=':0.0'
+
+## NOTE: cinnamon schema need an URI with a protocol prefix like file:// or so
 ## need to see if mate's schema works with this protocol or maybe I will have to
 ## add a 'protocol' variable or 'prefix' for the image name/URI
 set_schema_key(){
@@ -55,6 +57,7 @@ main(){
     set_schema_key
 
     validate_dir "$wallpaper_dir_path"
+    ## TODO: Do I need to modify this case now that is wrapped inside main()???
     case $# in
         0) get_random_theme
             ;;
@@ -69,7 +72,7 @@ main(){
     esac
     #gsettings set org.mate.background picture-filename "$file_path"  
     gsettings set "${schema}" "${key}" "${key_prefix}${file_path}"  
-    echo "Selected image: ${key_prefix}$file_path"
+    echo "[$(date)] Selected image: ${key_prefix}$file_path"
 }
 
-main
+main $1
