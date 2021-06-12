@@ -51,22 +51,25 @@ usage(){
 ####### Main ########
 #echo "Outside Function:" $bus_address
 #export $bus_address
+main(){
+    set_schema_key
 
-set_schema_key
+    validate_dir "$wallpaper_dir_path"
+    case $# in
+        0) get_random_theme
+            ;;
+        1)  theme_folder="$1"
+            wallpaper_dir_path="$wallpaper_dir_path/$theme_folder"
+            validate_dir "$wallpaper_dir_path"
+            get_random_theme
+            ;;
+        *) usage
+            exit 1
+            ;;
+    esac
+    #gsettings set org.mate.background picture-filename "$file_path"  
+    gsettings set "${schema}" "${key}" "${key_prefix}${file_path}"  
+    echo "Selected image: ${key_prefix}$file_path"
+}
 
-validate_dir "$wallpaper_dir_path"
-case $# in
-    0) get_random_theme
-        ;;
-    1)  theme_folder="$1"
-        wallpaper_dir_path="$wallpaper_dir_path/$theme_folder"
-        validate_dir "$wallpaper_dir_path"
-        get_random_theme
-        ;;
-    *) usage
-        exit 1
-        ;;
-esac
-#gsettings set org.mate.background picture-filename "$file_path"  
-gsettings set "${schema}" "${key}" "${key_prefix}${file_path}"  
-echo "Selected image: ${key_prefix}$file_path"
+main
