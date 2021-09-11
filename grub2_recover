@@ -1,0 +1,17 @@
+#!/bin/bash
+sudo mount /dev/sda19 /mnt
+sudo mount /dev/sda1 /mnt/boot/efi
+for i in /dev /dev/pts /proc /sys /run; do sudo mount -B $i /mnt$i; done
+
+sudo chroot /mnt
+
+apt-get install --reinstall grub-efi-amd64
+grub-install /dev/sda
+update-grub
+
+exit
+
+for i in /sys/proc /dev/pts /dev; do sudo umount /mnt$i; done
+sudo umount /mnt/boot/efi
+sudo umount /mnt
+sudo reboot
