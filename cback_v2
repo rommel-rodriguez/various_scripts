@@ -13,6 +13,9 @@ key=""
 key_prefix=""
 my_display=':0.0'
 
+## TODO: Cron is Desktop Environment agnostic (does not have the $DESKTOP_SESSION,
+## variable set), so I need to modify thisscript in response to this fact.
+
 ## NOTE: cinnamon schema need an URI with a protocol prefix like file:// or so
 ## need to see if mate's schema works with this protocol or maybe I will have to
 ## add a 'protocol' variable or 'prefix' for the image name/URI
@@ -29,7 +32,7 @@ set_schema_key(){
             key="picture-uri"
             key_prefix='file://'
             ;;
-        *) echo "[ERROR]: Desktop Environment NOT supported" >&2
+        *) echo "[$(date) ERROR]: Desktop Environment NOT supported" >&2
             exit 1
             ;;
     esac
