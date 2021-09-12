@@ -1,17 +1,30 @@
 #!/bin/bash
-sudo mount /dev/sda19 /mnt
-sudo mount /dev/sda1 /mnt/boot/efi
+
+# TODO: Confirm if this kind of substitiution is valid in zsh
+EFI_PART=${1:-"sdb1"}
+OS_PART=${2:-"sdb16"}
+echo "EFI(ESP) Partition on: /dev/${EFI_PART}"
+echo "OS Partition on: /dev/${OS_PART}"
+## TODO: Add a prompt to confirm the setup
+sudo mount /dev/${OS_PART} /mnt
+sudo mount /dev/${EFI_PART} /mnt/boot/efi
 for i in /dev /dev/pts /proc /sys /run; do sudo mount -B $i /mnt$i; done
 
+## TODO: Make this non-interactive to just run this script as it is
+### BEGIN OF INTERATIVE PART
 sudo chroot /mnt
-
 apt-get install --reinstall grub-efi-amd64
-grub-install /dev/sda
+grub-install /dev/sdb # TODO: Need to automatize to point to specific disk
+## The following expansion should remove the numeric part from the partition's
+## name and leave us with the name of the disk
+## TODO: This will only work if we make chroot non-interactive
+# grub-install /dev/${EFI_PART%%[0-9]*} 
 update-grub
-
 exit
+### END OF INTERATIVE PART
 
-for i in /sys/proc /dev/pts /dev; do sudo umount /mnt$i; done
+
+for i in /run /proc /sys /dev/pts /dev; do sudo umount /mnt$i; done
 sudo umount /mnt/boot/efi
 sudo umount /mnt
 sudo reboot
