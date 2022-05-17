@@ -16,13 +16,17 @@ power_req(){
         sudo apt-get install python3-pip
         sudo pip install powerline-status
     fi
+    # TODO: Download fonts to /tmp
+    # TODO: Download more fonts to have more choice
+    # Retrieve preferred font
+    wget https://github.com/powerline/fonts/raw/master/Hack/Hack-Regular.ttf
+
     query=  # Clean query before new search 
     query=$(apt-cache search  ^fonts-powerline$)
     if test -n "$query";then
         sudo apt-get install -y fonts-powerline
         if test "$?" = "0";then
             GOT_FONTS=1
-            wget https://github.com/powerline/fonts/raw/master/Hack/Hack-Regular.ttf
         fi
     else
         ## Package fonts-powerline is supposed to
@@ -39,7 +43,7 @@ get_font_path(){
         --complement)
 }
 move_fonts_update(){
-    # TODO: Add logic to Only do Hack-regular if GOT_FONTS is set
+    # Move preferred font to FONT_PATH
     sudo mv Hack-Regular.ttf $FONT_PATH
     if test "$GOT_FONTS" -ne 1;then
         sudo mv PowerlineSymbols.otf $FONT_PATH
