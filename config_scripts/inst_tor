@@ -9,6 +9,8 @@ add_repo(){
 }
 
 add_key(){
+    ## TODO: This might be subject to change so find out a more robust method of 
+    ## gettting the key.
     sudo gpg --keyserver keys.gnupg.net --recv 886DDD89
     sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
 }
