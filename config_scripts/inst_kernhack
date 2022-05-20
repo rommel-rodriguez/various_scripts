@@ -1,0 +1,15 @@
+#!/bin/bash
+# Script to install tools required for Linux kernel hacking
+# Assumes Debian environment for now.
+sudo apt-get update 
+sudo apt-get install -y vim libncurses5-dev gcc make git exuberant-ctags libssl-dev bison flex libelf-dev bc dwarves zstd git-email
+
+#############################   EMAIL SOFTWARE ##############################
+# To enable sending email through git-send-email:
+sudo apt-get install -y esmtp
+# Mail client that can handle plain text patch format:
+sudo apt-get install -y mutt
+# To send patches through git-email package. Installs git-send-mail
+sudo apt-get install -y git-email
+
+#############################   EMAIL SOFTWARE ##############################
