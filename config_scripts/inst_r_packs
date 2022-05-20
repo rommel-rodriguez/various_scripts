@@ -1,9 +1,0 @@
-#!/usr/bin/env Rscript
-
-#install.packages("dplyr") ### The DeepLayer package, which is essential.
-#install.packages("tidyverse")
-install.packages("RColorBrewer")
-#install.packages("ggplot2")  ### Should be included in tidyverse.
-#install.packages("dslabs") #### Hardvard X package with lots of data for practicing, including
-#gapminder data.
-#install.packages("tidyverse")
