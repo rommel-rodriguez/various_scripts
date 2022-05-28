@@ -1,25 +1,43 @@
 #!/bin/bash
+
 FONT_PATH=
 REP_ROOT=
 GOT_FONTS=0
+####################### REPOSITORIES ######################
+PLGH='https://github.com/powerline/powerline.git'
+PLFONTSGH='https://github.com/powerline/fonts.git'
+####################### PATH TO RAW FILES ######################
+PLRAW='https://github.com/powerline/powerline/raw'
+PLFONTSRAW='https://github.com/powerline/fonts/raw'
+
+install_fonts(){
+    dirname='powerline_fonts'
+    git clone "${PLFONTSGH}" /tmp/$dirname
+    pushd /tmp/$dirname
+    ./install.sh &&\
+         echo "Success installing fonts for local user"
+    popd
+    rm -rf /tmp/$dirname
+}
+
 power_req(){
     sudo apt-get update
-    # TODO: Implement 2 variables to hold the
-    # name of th powerline and fonts packages.
     query=$(apt-cache search  ^powerline$)
     if test -n "$query";then
         ## Package powerline is supposed to
         ## install the packages installed manually 
         ## before
+        # TODO: This might not be the best method to install powerline
+        # It seems the right way is to install powerline-status through pip3
+        # even if its locally
         sudo apt-get install -y powerline
     else
         sudo apt-get install python3-pip
+        # TODO Ensure that this is pip3 and not pip2
         sudo pip install powerline-status
     fi
-    # TODO: Download fonts to /tmp
-    # TODO: Download more fonts to have more choice
-    # Retrieve preferred font
-    wget https://github.com/powerline/fonts/raw/master/Hack/Hack-Regular.ttf
+
+    wget "${PLFONTSRAW}/master/Hack/Hack-Regular.ttf"
 
     query=  # Clean query before new search 
     query=$(apt-cache search  ^fonts-powerline$)
@@ -32,9 +50,11 @@ power_req(){
         ## Package fonts-powerline is supposed to
         ## install the packages installed manually 
         ## before
-        wget https://github.com/powerline/powerline/raw/develop/font/PowerlineSymbols.otf
-        wget https://github.com/powerline/powerline/raw/develop/font/10-powerline-symbols.conf
+        wget "${PLRAW}/develop/font/PowerlineSymbols.otf"
+        wget "${PLRAW}/develop/font/10-powerline-symbols.conf"
     fi
+    # In either case install locally the complete set of fonts from the repo
+    install_fonts
 }
 get_font_path(){
     line_number=$(xset q | grep -ni 'Font Path' | cut --bytes=1,2)
@@ -100,6 +120,7 @@ _EOF_
     fi
     
 }
+
 power_req &&\
     get_font_path && move_fonts_update &&\
     test_support &&\
