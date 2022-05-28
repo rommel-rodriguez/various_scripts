@@ -12,4 +12,9 @@ sudo apt-get install -y mutt
 # To send patches through git-email package. Installs git-send-mail
 sudo apt-get install -y git-email
 
-#############################   EMAIL SOFTWARE ##############################
+#############################   CHECKPATCH Git Post-Commit Hook requirements ##############################
+sudo apt-get install codespell
+sudo apt-get install python3-ply python3-git
+
+
+
