@@ -104,7 +104,7 @@ sub get_duplicates{
     #TODO: REMOVE . and .. folders form removal or we gonna have HELL HERE.
     my ($kdir, $cdir) = @_;
 
-    opendir my $kdir_dh, "$kdir" or die "Cannot Open Directory $test_dir\n";
+    opendir my $kdir_dh, "$kdir" or die "Cannot Open Directory $kdir\n";
 
     my @remove_list = ();
     my @potential_files = $recursive != 1 ?  &get_files_normal($cdir) : &get_files_recursive($cdir) ;
@@ -160,10 +160,11 @@ sub measure_total{
     my (@files,) = @_;
     #my $command = "";
     my @sizes_temp = map { qx/du -s "$_"/ } @files;
+    my $total_size = 0;
     #print @sizes_temp;
     #die "Testing shell command";
     my @sizes = map { m/^(\d*)\s+(.*)/; $1 } @sizes_temp; ### Second group would be the filename.
-    my $total_size = sum(@sizes); ## In Kilo Bytes
+    $total_size = sum(@sizes) ? @sizes : 0; ## In Kilo Bytes
     $total_size = $total_size / 2**10; ## In MB
     return $total_size
 }

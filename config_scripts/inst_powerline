@@ -39,8 +39,8 @@ power_req(){
 get_font_path(){
     line_number=$(xset q | grep -ni 'Font Path' | cut --bytes=1,2)
     line_number=$(($line_number+1))
-    FONT_PATH=$(xset q | head --lines=$line_number | tail --lines=1 | cut --delimiter=, --fields=1 | cut -c 1,2\
-        --complement)
+    FONT_PATH=$(xset q | head --lines=$line_number | tail --lines=1 |\
+        cut --delimiter=, --fields=1 | cut -c 1,2 --complement)
 }
 move_fonts_update(){
     # Move preferred font to FONT_PATH

@@ -30,7 +30,7 @@ installYCM(){
     git submodule update --init --recursive
     ### TODO: may need to add here clang libraries for installation
     ## TODO: ycm does not seem to install on ubuntu20.04-based systems ...
-	python3 install.py --clang-completer	
+	python3 install.py --clang-completer
 	popd
 }
 installYCM
