@@ -112,6 +112,8 @@ _EOF_
 )
     # TODO: Just use the grep command as an argument to
     # "if"
+    # TODO: Add logic to proof that REP_ROOT was found then delete previous line
+    # and re create it, only robust way to do this.
     grep -ie rtp+ $HOME/.vimrc &> /dev/null
     if [ ! $? -eq 0 ];then
         echo "$vpower_config" >> $HOME/.vimrc

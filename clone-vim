@@ -22,17 +22,21 @@ ln -s -b ${HOME}/.vim/vimrc ${HOME}/.vimrc
 ln -s -b ${HOME}/.vim/gvimrc ${HOME}/.gvimrc
 pushd ${HOME}/.vim
 git submodule update --init --recursive
-installYCM(){
-	# Ubuntu 16.04 and later
-	sudo apt install build-essential cmake python3-dev 
+install_ycm(){
+    # Basic requirements
+    sudo apt-get -y install build-essential cmake vim-nox python3-dev
+    # Language specific requirements: golang, and nodejs+npm for javascript
+    # and typescript support, I did not include requirements for C# and Java.
+    sudo apt-get -y install golang nodejs npm
 	pushd ${HOME}/.vim/bundle/YouCompleteMe
     ### Some submodules have themselves many submodules
     git submodule update --init --recursive
     ### TODO: may need to add here clang libraries for installation
     ## TODO: ycm does not seem to install on ubuntu20.04-based systems ...
-	python3 install.py --clang-completer
+	python3 install.py --clang-completer --clangd-completer --go-completer \
+        --js-completer --ts-completer
 	popd
 }
-installYCM
+install_ycm
 popd
 popd
