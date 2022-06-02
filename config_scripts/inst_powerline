@@ -1,6 +1,7 @@
 #!/bin/bash
 
 FONT_PATH=
+GOT_FONTS=false
 ####################### REPOSITORIES ######################
 PLGH='https://github.com/powerline/powerline.git'
 PLFONTSGH='https://github.com/powerline/fonts.git'
@@ -11,12 +12,14 @@ PLFONTSRAW='https://github.com/powerline/fonts/raw'
 LOCALDIR="${HOME}/.local/bin"
 LOCALINSTALL=false
 SHELLCONFIG="${HOME}/.bashrc"
+# System Wide variable(sudo)
+SW=""
 
 
 confirm(){
 	msg=$1
 	rsp=""
-	printf "%s\nConfirm?(Y/n): " "${msg}"
+	printf "%s \n(Y/n): " "${msg}"
 	read -r -e rsp # -r option to prevent \ to scape characters
 	rsp=$(echo "$rsp" | tr "[:upper:]" "[:lower:]")
 	if test "${rsp}" != "y"; then
@@ -39,51 +42,61 @@ add_localdir(){
 
 
 install_fonts(){
-    dirname='powerline_fonts'
-    git clone "${PLFONTSGH}" /tmp/$dirname
-    pushd /tmp/$dirname
-    ./install.sh &&\
-         echo "Success installing fonts for local user"
-    popd
-    rm -rf /tmp/$dirname
+	scope="Local User"
+	if ! $LOCALINSTALL;then
+		scope="System Wide"
+	fi
+
+	dirname='powerline_fonts'
+	git clone "${PLFONTSGH}" /tmp/$dirname
+	pushd /tmp/$dirname
+	"$SW" ./install.sh &&\
+		echo "Success installing fonts in scope: ${scope}"
+	popd
+	rm -rf /tmp/$dirname
 }
 
 
 power_req(){
-    sudo apt-get update
-    query=$(apt-cache search  ^powerline$)
-    if test -n "$query";then
-        ## Package powerline is supposed to
-        ## install the packages installed manually 
-        ## before
-        # TODO: This might not be the best method to install powerline
-        # It seems the right way is to install powerline-status through pip3
-        # even if its locally
-        sudo apt-get install -y powerline
-    else
-        sudo apt-get install python3-pip
-        # TODO Ensure that this is pip3 and not pip2
-        sudo pip install powerline-status
-    fi
+	if ! $LOCALINSTALL;then
+		sudo apt-get update
+		query=$(apt-cache search  ^powerline$)
+		if test -n "$query";then
+			sudo pip3 install powerline-status ||\
+				sudo apt-get install -y powerline
+		fi
+		# TODO: Assess if this is actually still necessary after due
+		# to the fact that installing form the repo might be more than
+		# enough, gonna comment out this block, reenable if this does
+		# not work after testing in clean environment.
+		##  query=$(apt-cache search  ^fonts-powerline$)
+		##  if test -n "$query";then
+		##  	sudo apt-get install -y fonts-powerline
+		##  fi
+	else
+		# Local Install
+		# TODO: Ensure that pip3 is installed
+		pip3 install powerline-status
 
-    wget "${PLFONTSRAW}/master/Hack/Hack-Regular.ttf"
+	fi
 
-    query=  # Clean query before new search 
-    query=$(apt-cache search  ^fonts-powerline$)
-    if test -n "$query";then
-        sudo apt-get install -y fonts-powerline
-        if test "$?" = "0";then
-            GOT_FONTS=1
-        fi
-    else
-        ## Package fonts-powerline is supposed to
-        ## install the packages installed manually 
-        ## before
-        wget "${PLRAW}/develop/font/PowerlineSymbols.otf"
-        wget "${PLRAW}/develop/font/10-powerline-symbols.conf"
-    fi
-    # In either case install locally the complete set of fonts from the repo
-    install_fonts
+	install_fonts
+
+
+	# wget "${PLFONTSRAW}/master/Hack/Hack-Regular.ttf"
+
+	# query=  # Clean query before new search 
+	# query=$(apt-cache search  ^fonts-powerline$)
+	# if test -n "$query" -a sudo apt-get install -y fonts-powerline;then
+	# 	GOT_FONTS=true
+	# else
+	# 	## Package fonts-powerline is supposed to
+	# 	## install the packages installed manually 
+	# 	## before
+	# 	wget "${PLRAW}/develop/font/PowerlineSymbols.otf"
+	# 	wget "${PLRAW}/develop/font/10-powerline-symbols.conf"
+	# fi
+	# # In either case install locally the complete set of fonts from the repo
 }
 
 
@@ -102,7 +115,7 @@ move_fonts_update(){
     # Move preferred font to FONT_PATH
     # TODO: Add support for local install
     sudo mv Hack-Regular.ttf "$FONT_PATH"
-    if test "$GOT_FONTS" -ne 1;then
+    if ! $GOT_FONTS;then
         sudo mv PowerlineSymbols.otf "$FONT_PATH"
     fi
     fc-cache -vf "$FONT_PATH"
@@ -114,9 +127,11 @@ test_support(){
     # if [ $? -eq 0 ];then 
     if vim --version | grep -q -E '\+python3';then 
         echo "Vim has python3 support"
+	return 0
     else
         echo -e "Vim does not have python support this has to be fixed"\
             "or powerline will not work on vim"
+	return 1
     fi
 }
 get_rep_root(){
@@ -159,18 +174,45 @@ _EOF_
     # and re create it, only robust way to do this.
     # grep -ie rtp+ "${HOME}/.vimrc" &> /dev/null
     # if [ ! $? -eq 0 ];then
-    if grep --quiet -ie "rtp+" "${HOME}/.vimrc" ;then
-        echo "$vpower_config" >> "${HOME}/.vimrc"
+    if grep --quiet -ie "^set *rtp+" "${HOME}/.vimrc" ;then
+	prevconf=$(grep -ie "^set *rtp+" "${HOME}/.vimrc")
+	msg=""
+	# TODO: Test whether the vars will expand or not
+	read -r -d '' msg <<-_EOF_
+	Previous configuraton:
+	${prevconf}
+	Do you wish replace it for:
+	${vpower_config}
+	_EOF_
+
+	if confirm "${msg}";then
+		# TODO: Implement "smart" update of .vimrc
+		echo "Update .vimrc here"
+		# sed --in-place 's/set laststatus=2//' 
+		# sed --in-place "s/^set *rtp+.*$/${vpower_config}/"
+	fi
     else
-        echo "Config line alredy in vimrc"
+        echo "There is no previous configuration, writing to .vimrc ..."
+        echo "$vpower_config" >> "${HOME}/.vimrc"
     fi
     
 }
 
-# if confirm "Local Installation?"; then
-# 	LOCALINSTALL=true
-# 	echo "Execute install_local function"
-# fi
+if confirm "Local Installation?"; then
+	LOCALINSTALL=true
+	echo "Execute install_local function"
+fi
+if $LOCALINSTALL;then
+	SW="sudo"
+fi
+
+
+# power_req &&\
+#     get_font_path &&\
+#     test_support &&\
+#     get_rep_root && update_bashrc && update_vimrc
+
+# Original Version:
 # power_req &&\
 #     get_font_path && move_fonts_update &&\
 #     test_support &&\
