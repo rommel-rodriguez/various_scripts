@@ -16,9 +16,9 @@ SHELLCONFIG="${HOME}/.bashrc"
 confirm(){
 	msg=$1
 	rsp=""
-	printf "${msg}\nConfirm?(Y/n): "
-	read -e rsp
-	rsp=$(echo $rsp | tr [:upper:] [:lower:])
+	printf "%s\nConfirm?(Y/n): " "${msg}"
+	read -r -e rsp # -r option to prevent \ to scape characters
+	rsp=$(echo "$rsp" | tr "[:upper:]" "[:lower:]")
 	if test "${rsp}" != "y"; then
 		echo "Aborting operation"
 		return 1 
@@ -33,7 +33,7 @@ add_localdir(){
 	# the powerline-specific code inside .bashrc or else bash will not 
 	# know where to find the necessary binaries.
 	if ! (echo $PATH | grep -q "$LOCALDIR"); then
-		echo 'PATH=$PATH:'$LOCALDIR";export PATH;" >> "${HOME}/.bashrc"
+		echo 'PATH=$PATH:'$LOCALDIR";export PATH;" >> "${SHELLCONFIG}"
 	fi
 }
 
@@ -97,6 +97,7 @@ get_font_path(){
 
 move_fonts_update(){
     # Move preferred font to FONT_PATH
+    # TODO: Add support for local install
     sudo mv Hack-Regular.ttf $FONT_PATH
     if test "$GOT_FONTS" -ne 1;then
         sudo mv PowerlineSymbols.otf $FONT_PATH
@@ -130,12 +131,12 @@ POWERLINE_BASH_SELECT=1
 ####### End of powerline related config
 _EOF_
     )
-    grep -ie powerline-daemon $HOME/.bashrc &> /dev/null
+    grep -ie powerline-daemon "${SHELLCONFIG}"  &> /dev/null
     if [ ! $? -eq 0 ];then
 	if $LOCALINSTALL;then
 		add_localdir		
 	fi
-        echo "$powerl_config" >> $HOME/.bashrc
+        echo "$powerl_config" >> "${SHELLCONFIG}" 
     else
         echo "Config line alredy there"
     fi

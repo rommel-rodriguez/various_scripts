@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+# Bash script to install some syntax-checkers to be used mainly with the
+# Syntastic bash plugin
+
+
+# BASH Checkers
+sudo apt-get install -y shellcheck 
+
+# C Checkers
+
+# Python checkers (Better to use conda or virtualenv for this one)
+
