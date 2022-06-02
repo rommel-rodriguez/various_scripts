@@ -11,13 +11,14 @@ PLFONTSRAW='https://github.com/powerline/fonts/raw'
 confirm(){
 	msg=$1
 	rsp=""
-	print "${msg}\nConfirm?(Y/n)"
+	printf "${msg}\nConfirm?(Y/n): "
 	read -e rsp
 	rsp=$(echo $rsp | tr [:upper:] [:lower:])
 	if test "${rsp}" != "y"; then
 		echo "Aborting operation"
-		exit 1
+		return 1 
 	fi
+	return 0 
 }
 
 install_fonts(){
@@ -133,7 +134,10 @@ _EOF_
     
 }
 
-power_req &&\
-    get_font_path && move_fonts_update &&\
-    test_support &&\
-    get_rep_root && update_bashrc && update_vimrc
+if confirm "Local Installation?"; then
+	echo "Execute install_local function"
+fi
+# power_req &&\
+#     get_font_path && move_fonts_update &&\
+#     test_support &&\
+#     get_rep_root && update_bashrc && update_vimrc
