@@ -38,12 +38,13 @@ add_localdir(){
 	# the powerline-specific code inside .bashrc or else bash will not 
 	# know where to find the necessary binaries.
 	if ! (echo "$PATH" | grep -q "$LOCALDIR"); then
-		echo 'PATH=$PATH:'$LOCALDIR";export PATH;" >> "${SHELLCONFIG}"
+		echo 'PATH=$PATH:'"$LOCALDIR"';export PATH;' >> "${SHELLCONFIG}"
 	fi
 }
 
 
 install_fonts(){
+	# TODO: Problem here, install.sh does not support system wide install
 	scope="Local User"
 	if ! $LOCALINSTALL;then
 		scope="System Wide"
@@ -52,7 +53,7 @@ install_fonts(){
 	dirname='powerline_fonts'
 	git clone "${PLFONTSGH}" /tmp/$dirname
 	pushd /tmp/$dirname
-	"$SW" ./install.sh &&\
+	./install.sh &&\
 		echo "Success installing fonts in scope: ${scope}"
 	popd
 	rm -rf /tmp/$dirname
@@ -136,32 +137,37 @@ test_support(){
 	return 1
     fi
 }
+
+
 get_rep_root(){
-# This function obtains the path to the repository-root
+	# This function obtains the path to the repository-root
     REP_ROOT=$(pip show powerline-status | grep -i location \
         | cut --delimiter=' ' -f 2)
 }
+
+
 update_bashrc(){
-    powerl_config=$(cat<<-_EOF_
-####### Start of powerline related config
-powerline-daemon -q
-POWERLINE_BASH_CONTINUATION=1
-POWERLINE_BASH_SELECT=1
-. $REP_ROOT/powerline/bindings/bash/powerline.sh
-####### End of powerline related config
-_EOF_
-    )
-    # grep -ie powerline-daemon "${SHELLCONFIG}"  &> /dev/null
-    # if [ ! $? -eq 0 ];then
-    if grep --quiet -ie powerline-daemon "${SHELLCONFIG}";then
-	if $LOCALINSTALL;then
-		add_localdir		
+	read -r -d '' powerl_config<<- _EOF_
+	####### Start of powerline related config
+	powerline-daemon -q
+	POWERLINE_BASH_CONTINUATION=1
+	POWERLINE_BASH_SELECT=1
+	. $REP_ROOT/powerline/bindings/bash/powerline.sh
+	####### End of powerline related config
+	_EOF_
+
+	# grep -ie powerline-daemon "${SHELLCONFIG}"  &> /dev/null
+	# if [ ! $? -eq 0 ];then
+	if grep --quiet -ie "powerline-daemon" "${SHELLCONFIG}";then
+		if $LOCALINSTALL;then
+			add_localdir		
+		fi
+		echo "$powerl_config" >> "${SHELLCONFIG}" 
+	else
+		echo "Config line alredy there"
 	fi
-        echo "$powerl_config" >> "${SHELLCONFIG}" 
-    else
-        echo "Config line alredy there"
-    fi
 }
+
 
 update_vimrc(){
 	vpower_config=""
@@ -171,20 +177,9 @@ update_vimrc(){
 	set laststatus=2
 	_EOF_
 
-# 	vpower_config=$(cat<<-_EOF_
-# " POWERLINE CONFIG 
-# set  rtp+=$REP_ROOT/powerline/bindings/vim/
-# set laststatus=2
-# _EOF_
-# 	)
 	# Next line's version works but quite ugly
 	# vpower_config="\" POWERLINE FLAG\\nset rtp+=$REP_ROOT/powerline/bindings/vim/\\nset laststatus=2"
-	# TODO: Just use the grep command as an argument to
-	# "if"
-	# TODO: Add logic to proof that REP_ROOT was found then delete previous line
-	# and re create it, only robust way to do this.
-	# grep -ie rtp+ "${VIMCONFIG}" &> /dev/null
-	# if [ ! $? -eq 0 ];then
+	# TODO: Add logic to proof that REP_ROOT was found
 	if grep --quiet -ie "^set *rtp+=.*powerline.*$" "${VIMCONFIG}" ;then
 	prevconf=$(grep -ie "^set *rtp+=.*powerline.*$" "${VIMCONFIG}")
 	msg=""
@@ -197,8 +192,6 @@ update_vimrc(){
 	_EOF_
 
 	if confirm "${msg}";then
-		# TODO: Implement "smart" update of .vimrc
-		# echo "Update .vimrc here"
 		# sed --in-place ':set laststatus=2::' "${VIMCONFIG}"
 		# sed --in-place "s:^set *rtp+.*$:${vpower_config}:" "${VIMCONFIG}"
 		# Delete previous configuration
@@ -221,8 +214,8 @@ if $LOCALINSTALL;then
 	SW="sudo"
 fi
 
-get_rep_root
-update_vimrc
+# get_rep_root
+# update_vimrc
 
 
 # power_req &&\
