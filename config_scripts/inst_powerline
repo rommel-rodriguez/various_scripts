@@ -10,6 +10,8 @@ PLRAW='https://github.com/powerline/powerline/raw'
 PLFONTSRAW='https://github.com/powerline/fonts/raw'
 
 LOCALDIR="${HOME}/.local/bin"
+VIMCONFIG="${HOME}/.vimrc"
+GVIMCONFIG="${HOME}/.gvimrc"
 LOCALINSTALL=false
 SHELLCONFIG="${HOME}/.bashrc"
 # System Wide variable(sudo)
@@ -162,20 +164,29 @@ _EOF_
 }
 
 update_vimrc(){
-    vpower_config=$(cat<<-_EOF_
-" Making powerline work"
-set  rtp+=$REP_ROOT/powerline/bindings/vim/
-set laststatus=2
-_EOF_
-)
-    # TODO: Just use the grep command as an argument to
-    # "if"
-    # TODO: Add logic to proof that REP_ROOT was found then delete previous line
-    # and re create it, only robust way to do this.
-    # grep -ie rtp+ "${HOME}/.vimrc" &> /dev/null
-    # if [ ! $? -eq 0 ];then
-    if grep --quiet -ie "^set *rtp+" "${HOME}/.vimrc" ;then
-	prevconf=$(grep -ie "^set *rtp+" "${HOME}/.vimrc")
+	vpower_config=""
+	read -r -d '' vpower_config<<- _EOF_
+	" POWERLINE CONFIG
+	set  rtp+=${REP_ROOT}/powerline/bindings/vim/
+	set laststatus=2
+	_EOF_
+
+# 	vpower_config=$(cat<<-_EOF_
+# " POWERLINE CONFIG 
+# set  rtp+=$REP_ROOT/powerline/bindings/vim/
+# set laststatus=2
+# _EOF_
+# 	)
+	# Next line's version works but quite ugly
+	# vpower_config="\" POWERLINE FLAG\\nset rtp+=$REP_ROOT/powerline/bindings/vim/\\nset laststatus=2"
+	# TODO: Just use the grep command as an argument to
+	# "if"
+	# TODO: Add logic to proof that REP_ROOT was found then delete previous line
+	# and re create it, only robust way to do this.
+	# grep -ie rtp+ "${VIMCONFIG}" &> /dev/null
+	# if [ ! $? -eq 0 ];then
+	if grep --quiet -ie "^set *rtp+=.*powerline.*$" "${VIMCONFIG}" ;then
+	prevconf=$(grep -ie "^set *rtp+=.*powerline.*$" "${VIMCONFIG}")
 	msg=""
 	# TODO: Test whether the vars will expand or not
 	read -r -d '' msg <<-_EOF_
@@ -187,15 +198,19 @@ _EOF_
 
 	if confirm "${msg}";then
 		# TODO: Implement "smart" update of .vimrc
-		echo "Update .vimrc here"
-		# sed --in-place 's/set laststatus=2//' 
-		# sed --in-place "s/^set *rtp+.*$/${vpower_config}/"
+		# echo "Update .vimrc here"
+		# sed --in-place ':set laststatus=2::' "${VIMCONFIG}"
+		# sed --in-place "s:^set *rtp+.*$:${vpower_config}:" "${VIMCONFIG}"
+		# Delete previous configuration
+		sed --in-place '/POWERLINE CONFIG$/d' "${VIMCONFIG}"
+		sed --in-place '/set laststatus=2/d' "${VIMCONFIG}"
+		sed --in-place '/^set *rtp+.*powerline.*$/d' "${VIMCONFIG}"
+		echo "${vpower_config}" >> "$VIMCONFIG"
 	fi
-    else
-        echo "There is no previous configuration, writing to .vimrc ..."
-        echo "$vpower_config" >> "${HOME}/.vimrc"
-    fi
-    
+	else
+		echo "There is no previous configuration, writing to .vimrc ..."
+		echo "$vpower_config" >> "${VIMCONFIG}"
+	fi
 }
 
 if confirm "Local Installation?"; then
@@ -205,6 +220,9 @@ fi
 if $LOCALINSTALL;then
 	SW="sudo"
 fi
+
+get_rep_root
+update_vimrc
 
 
 # power_req &&\
