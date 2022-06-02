@@ -32,7 +32,7 @@ add_localdir(){
 	# TODO: Somehow ensure that this addition to the PATH, comes BEFORE
 	# the powerline-specific code inside .bashrc or else bash will not 
 	# know where to find the necessary binaries.
-	if ! (echo $PATH | grep -q "$LOCALDIR"); then
+	if ! (echo "$PATH" | grep -q "$LOCALDIR"); then
 		echo 'PATH=$PATH:'$LOCALDIR";export PATH;" >> "${SHELLCONFIG}"
 	fi
 }
@@ -89,7 +89,10 @@ power_req(){
 
 get_font_path(){
     line_number=$(xset q | grep -ni 'Font Path' | cut --bytes=1,2)
-    line_number=$(($line_number+1))
+    # line_number=$(($line_number+1))
+    # Shellcheck says we do not need $ in fron of variables for arithmetic 
+    # operations
+    line_number=$((line_number+1))
     FONT_PATH=$(xset q | head --lines=$line_number | tail --lines=1 |\
         cut --delimiter=, --fields=1 | cut -c 1,2 --complement)
 }
@@ -98,19 +101,19 @@ get_font_path(){
 move_fonts_update(){
     # Move preferred font to FONT_PATH
     # TODO: Add support for local install
-    sudo mv Hack-Regular.ttf $FONT_PATH
+    sudo mv Hack-Regular.ttf "$FONT_PATH"
     if test "$GOT_FONTS" -ne 1;then
-        sudo mv PowerlineSymbols.otf $FONT_PATH
+        sudo mv PowerlineSymbols.otf "$FONT_PATH"
     fi
-    fc-cache -vf $FONT_PATH
+    fc-cache -vf "$FONT_PATH"
 }
 
 
 test_support(){
-    response=""
-    vim --version | grep -E '\+python' &> /dev/null
-    if [ $? -eq 0 ];then 
-        echo "Vim has python support"
+    # vim --version | grep -E '\+python' &> /dev/null
+    # if [ $? -eq 0 ];then 
+    if vim --version | grep -q -E '\+python3';then 
+        echo "Vim has python3 support"
     else
         echo -e "Vim does not have python support this has to be fixed"\
             "or powerline will not work on vim"
@@ -131,8 +134,9 @@ POWERLINE_BASH_SELECT=1
 ####### End of powerline related config
 _EOF_
     )
-    grep -ie powerline-daemon "${SHELLCONFIG}"  &> /dev/null
-    if [ ! $? -eq 0 ];then
+    # grep -ie powerline-daemon "${SHELLCONFIG}"  &> /dev/null
+    # if [ ! $? -eq 0 ];then
+    if grep --quiet -ie powerline-daemon "${SHELLCONFIG}";then
 	if $LOCALINSTALL;then
 		add_localdir		
 	fi
@@ -153,9 +157,10 @@ _EOF_
     # "if"
     # TODO: Add logic to proof that REP_ROOT was found then delete previous line
     # and re create it, only robust way to do this.
-    grep -ie rtp+ $HOME/.vimrc &> /dev/null
-    if [ ! $? -eq 0 ];then
-        echo "$vpower_config" >> $HOME/.vimrc
+    # grep -ie rtp+ "${HOME}/.vimrc" &> /dev/null
+    # if [ ! $? -eq 0 ];then
+    if grep --quiet -ie "rtp+" "${HOME}/.vimrc" ;then
+        echo "$vpower_config" >> "${HOME}/.vimrc"
     else
         echo "Config line alredy in vimrc"
     fi
