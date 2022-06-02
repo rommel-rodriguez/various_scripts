@@ -8,6 +8,11 @@ PLFONTSGH='https://github.com/powerline/fonts.git'
 PLRAW='https://github.com/powerline/powerline/raw'
 PLFONTSRAW='https://github.com/powerline/fonts/raw'
 
+LOCALDIR="${HOME}/.local/bin"
+LOCALINSTALL=false
+SHELLCONFIG="${HOME}/.bashrc"
+
+
 confirm(){
 	msg=$1
 	rsp=""
@@ -21,6 +26,18 @@ confirm(){
 	return 0 
 }
 
+
+# Adds LOCALDIR to PATH environment variable, if it is not alreday present
+add_localdir(){
+	# TODO: Somehow ensure that this addition to the PATH, comes BEFORE
+	# the powerline-specific code inside .bashrc or else bash will not 
+	# know where to find the necessary binaries.
+	if ! (echo $PATH | grep -q "$LOCALDIR"); then
+		echo 'PATH=$PATH:'$LOCALDIR";export PATH;" >> "${HOME}/.bashrc"
+	fi
+}
+
+
 install_fonts(){
     dirname='powerline_fonts'
     git clone "${PLFONTSGH}" /tmp/$dirname
@@ -30,6 +47,7 @@ install_fonts(){
     popd
     rm -rf /tmp/$dirname
 }
+
 
 power_req(){
     sudo apt-get update
@@ -67,12 +85,16 @@ power_req(){
     # In either case install locally the complete set of fonts from the repo
     install_fonts
 }
+
+
 get_font_path(){
     line_number=$(xset q | grep -ni 'Font Path' | cut --bytes=1,2)
     line_number=$(($line_number+1))
     FONT_PATH=$(xset q | head --lines=$line_number | tail --lines=1 |\
         cut --delimiter=, --fields=1 | cut -c 1,2 --complement)
 }
+
+
 move_fonts_update(){
     # Move preferred font to FONT_PATH
     sudo mv Hack-Regular.ttf $FONT_PATH
@@ -81,6 +103,8 @@ move_fonts_update(){
     fi
     fc-cache -vf $FONT_PATH
 }
+
+
 test_support(){
     response=""
     vim --version | grep -E '\+python' &> /dev/null
@@ -98,16 +122,19 @@ get_rep_root(){
 }
 update_bashrc(){
     powerl_config=$(cat<<-_EOF_
-#######Start of powerline related config
+####### Start of powerline related config
 powerline-daemon -q
 POWERLINE_BASH_CONTINUATION=1
 POWERLINE_BASH_SELECT=1
 . $REP_ROOT/powerline/bindings/bash/powerline.sh
-#######End of powerline related config
+####### End of powerline related config
 _EOF_
     )
     grep -ie powerline-daemon $HOME/.bashrc &> /dev/null
     if [ ! $? -eq 0 ];then
+	if $LOCALINSTALL;then
+		add_localdir		
+	fi
         echo "$powerl_config" >> $HOME/.bashrc
     else
         echo "Config line alredy there"
@@ -134,9 +161,10 @@ _EOF_
     
 }
 
-if confirm "Local Installation?"; then
-	echo "Execute install_local function"
-fi
+# if confirm "Local Installation?"; then
+# 	LOCALINSTALL=true
+# 	echo "Execute install_local function"
+# fi
 # power_req &&\
 #     get_font_path && move_fonts_update &&\
 #     test_support &&\
