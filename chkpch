@@ -1,0 +1,46 @@
+#!/bin/bash
+#######################################
+# Cleanup files from the backup directory.
+# This script does not support nested directories inside a target directory
+# Globals:
+#   BACKUP_DIR
+#   ORACLE_SID
+# Arguments:
+#   None
+#######################################""
+
+# TODO: Implement a recursive algorithm to handle nested directories
+
+source_item=$1
+echo "Checking: ${source_item}"
+
+
+function errmsg(){
+	msg=$1
+	printf "[ERROR] %s\n" "${msg}"
+	exit 1
+}
+
+if [[ -n $KERNROOT  ]]; then
+	script_path="${KERNROOT}/scripts/checkpatch.pl"
+
+	if [[ ! -f $script_path ]];then
+		errmsg "checkpatch.pl script not found in ${script_path}"
+	fi
+
+	if [[ -f $source_item ]];then
+		echo "${source_item} is a regular file"
+		perl "${script_path}" -f "${source_item}"
+	elif [[ -d $source_item ]];then
+		echo "${source_item} is a directory"
+		## echo "${source_item}"/*
+		## echo ""
+		perl "${script_path}" -f "${source_item}"/*
+		# perl "${script_path}" -f "${source_item}/*"
+	else
+		errmsg "Item specified is neither a normal file nor a directory"
+	fi
+else
+	errmsg "KERNROOT Environment variable not set"
+fi
+

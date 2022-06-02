@@ -1,14 +1,24 @@
 #!/bin/bash
 
 FONT_PATH=
-REP_ROOT=
-GOT_FONTS=0
 ####################### REPOSITORIES ######################
 PLGH='https://github.com/powerline/powerline.git'
 PLFONTSGH='https://github.com/powerline/fonts.git'
 ####################### PATH TO RAW FILES ######################
 PLRAW='https://github.com/powerline/powerline/raw'
 PLFONTSRAW='https://github.com/powerline/fonts/raw'
+
+confirm(){
+	msg=$1
+	rsp=""
+	print "${msg}\nConfirm?(Y/n)"
+	read -e rsp
+	rsp=$(echo $rsp | tr [:upper:] [:lower:])
+	if test "${rsp}" != "y"; then
+		echo "Aborting operation"
+		exit 1
+	fi
+}
 
 install_fonts(){
     dirname='powerline_fonts'
