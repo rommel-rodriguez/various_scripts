@@ -37,6 +37,7 @@ install_ycm(){
         --js-completer --ts-completer
 	popd
 }
+# Commented with hyperx alloy origins core
 install_ycm
 popd
 popd

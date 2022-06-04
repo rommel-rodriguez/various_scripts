@@ -10,12 +10,12 @@ PLRAW='https://github.com/powerline/powerline/raw'
 PLFONTSRAW='https://github.com/powerline/fonts/raw'
 
 LOCALDIR="${HOME}/.local/bin"
-VIMCONFIG="${HOME}/.vimrc"
+VIMCONFIG="${HOME}/.vim/vimrc"
 GVIMCONFIG="${HOME}/.gvimrc"
 LOCALINSTALL=false
 SHELLCONFIG="${HOME}/.bashrc"
 # System Wide variable(sudo)
-SW=""
+# SW=""
 
 
 confirm(){
@@ -25,7 +25,7 @@ confirm(){
 	read -r -e rsp # -r option to prevent \ to scape characters
 	rsp=$(echo "$rsp" | tr "[:upper:]" "[:lower:]")
 	if test "${rsp}" != "y"; then
-		echo "Aborting operation"
+		# echo "Aborting operation"
 		return 1 
 	fi
 	return 0 
@@ -141,8 +141,16 @@ test_support(){
 
 get_rep_root(){
 	# This function obtains the path to the repository-root
-    REP_ROOT=$(pip show powerline-status | grep -i location \
-        | cut --delimiter=' ' -f 2)
+	if "${LOCALINSTALL}"; then
+		REP_ROOT=$( pip3 show powerline-status | grep -i location \
+			| cut --delimiter=' ' -f 2)
+		return 0
+	fi
+	# REP_ROOT=$("$SW" pip3 show powerline-status | grep -i location \
+	#     | cut --delimiter=' ' -f 2)
+	REP_ROOT=$( sudo pip3 show powerline-status | grep -i location \
+		| cut --delimiter=' ' -f 2)
+	return 0
 }
 
 
@@ -191,6 +199,7 @@ update_vimrc(){
 	${vpower_config}
 	_EOF_
 
+	echo "${VIMCONFIG}"
 	if confirm "${msg}";then
 		# sed --in-place ':set laststatus=2::' "${VIMCONFIG}"
 		# sed --in-place "s:^set *rtp+.*$:${vpower_config}:" "${VIMCONFIG}"
@@ -210,12 +219,11 @@ if confirm "Local Installation?"; then
 	LOCALINSTALL=true
 	echo "Execute install_local function"
 fi
-if $LOCALINSTALL;then
-	SW="sudo"
-fi
-
-# get_rep_root
-# update_vimrc
+# if ! "${LOCALINSTALL}";then
+# 	SW="sudo"
+# fi
+get_rep_root
+update_vimrc
 
 
 # power_req &&\

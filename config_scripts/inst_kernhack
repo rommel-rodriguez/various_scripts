@@ -13,8 +13,11 @@ sudo apt-get install -y mutt
 sudo apt-get install -y git-email
 
 #############################   CHECKPATCH Git Post-Commit Hook requirements ##############################
-sudo apt-get install codespell
-sudo apt-get install python3-ply python3-git
+sudo apt-get -y install codespell
+sudo apt-get -y install python3-ply python3-git
 
 
+#############################   Static Analysis Tools for Kernel Development  ##############################
+# Writen by Linus Torvalds
+sudo apt-get -y install sparse
 
