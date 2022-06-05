@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+VIMDIR="${HOME}/apps/vim/"
+
+install_featuredeps(){
+	# Installs required packages to enable vim features
+	#Add X windows clipboard support
+	sudo apt-get -y install "libxt-dev"
+	# Add Python 3 support, and uncomment
+	# CONF_OPT_PYTHON3 = --enable-python3interp in the Makefile
+	sudo apt-get -y install "libpython3-dev"
+	# Perl support
+	sudo apt-get -y install "libperl-dev"
+	# Lua support
+	sudo apt-get -y install "lua5.4" "liblua5.4-dev"
+	# Rugy support
+	sudo apt-get -y install "ruby-dev"
+	# gpm -For mosue support on Linux console
+	sudo apt-get -y install "libgpm-dev"
+}
+
+build_vim(){
+	pushd "${VIMDIR}"
+	make clean all
+	pushd "$VIMDIR"/src
+	# Do not know if just "make -j8 1>/dev/null" is preferrable here
+	make  -j"$(nproc)" reconfig 1>/dev/null
+	# make -j$(nproc) 1>/dev/null
+	# make -j$(nproc) test
+	make  test
+	# sudo make install
+	popd
+	popd
+}
+
+install_featuredeps
+# build_vim

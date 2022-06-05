@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -e
+. "${HOME}/bin/shadowutils.sh"
+
+if confirm "Do you wish to run 'make clean'?";then
+	make clean
+fi
+make -j"$(nproc)" 1>/dev/null
+# Options needed or else the initramfs becomes too big and OS booting fails
+
+if confirm "Do you wish to install the new kernel?";then
+	su -c 'make INSTALL_MOD_STRIP=1 modules_install && make install'
+fi
+# Separate commands require double password input if the first takes too long
+# sudo make INSTALL_MOD_STRIP=1 modules_install
+# sudo make install
