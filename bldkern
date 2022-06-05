@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
-. "${HOME}/bin/shadowutils.sh"
+. "${HOME}/bin/ilsutils.sh"
 
 if confirm "Do you wish to run 'make clean'?";then
 	make clean
