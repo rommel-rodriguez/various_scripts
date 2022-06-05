@@ -1,7 +1,10 @@
 #!/bin/bash
-which dig &> /dev/null
-if [ $? -ne 0 ]; then
-    echo "The program 'dig' is not installed"
-    exit 1
+source "$HOME/bin/ilsutils.sh"
+if ! which dig &> /dev/null; then
+	echo "The program 'dig' is not installed"
+	if ! confirm "Do you wish to install it?";then
+		exit 1
+	fi
+	sudo apt-get install -y dnsutils
 fi
 dig +short myip.opendns.com @resolver1.opendns.com
