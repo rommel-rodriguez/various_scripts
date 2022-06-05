@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 #### Add logic to install powerline from here
 bud="${HOME}/vim_backup" # Back Up Directory
+VIMDIR="${HOME}/.vim"
+VIMCONFIG="${HOME}/.vim/vimrc"
+GVIMCONFIG="${HOME}/.vim/gvimrc"
+VIMSYMLINK="${HOME}/.vimrc"
+GVIMSYMLINK="${HOME}/.gvimrc"
 ## TODO: Find out if the right vim is installed in the system
 ## TODO: IF current version does not work, modify ycm's repo-url to ycm-core
 pushd ${HOME}
@@ -17,13 +22,14 @@ fi
 # if [ ! -d ${HOME}/.vim ]; then
 ## TODO: Find the way to make vim create its own .vim folder in case it does not 
 ## exists yet.
-git clone https://github.com/JaghutTyrant/dotvim.git "${HOME}/.vim"
-ln -s -b ${HOME}/.vim/vimrc ${HOME}/.vimrc
-ln -s -b ${HOME}/.vim/gvimrc ${HOME}/.gvimrc
-pushd ${HOME}/.vim
+git clone https://github.com/JaghutTyrant/dotvim.git "${VIMDIR}"
+ln -s -b "${VIMCONFIG}" "${VIMSYMLINK}" 
+ln -s -b "${GVIMCONFIG}" "${GVIMSYMLINK}" 
+pushd"$VIMDIR" 
 git submodule update --init --recursive
 install_ycm(){
     # Basic requirements
+    # TODO: Update this vim-nox does not support clipboard
     sudo apt-get -y install build-essential cmake vim-nox python3-dev
     # Language specific requirements: golang, and nodejs+npm for javascript
     # and typescript support, I did not include requirements for C# and Java.
