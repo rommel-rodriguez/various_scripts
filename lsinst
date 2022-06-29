@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+# List locally installed packages in Debian derivatives
+PATTERN="$1"
+
+function usage(){
+    echo "This program needs a pattern to search for packages"
+    echo -e "\t$(basename $0) <PATTERN>"
+}
+
+if test "$#" -ne 1; then
+    echo "$#"" Parameters given."
+    usage
+    exit 1
+fi
+
+
+dpkg -l "*${PATTERN}*" | grep -E -i '^ii'
