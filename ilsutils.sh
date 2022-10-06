@@ -1,4 +1,4 @@
-
+# TODO: Random comment, delete this line later
 confirm(){
 	msg=$1
 	rsp=""
