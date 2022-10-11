@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+FILENAME="$1"
+BUILDDIR="build"
+PDFROOT="pdf_"
+TESSERACTBASE="text_"
+
+if [[ $# -ne 1 ]];then
+    echo "This script needs a single pdf filename as argument"
+    echo "Recieved: $# arguments"
+    echo "Arg[1]: $1"
+    exit 1
+fi
+
+mkdir "${BUILDDIR}"
+
+pushd "${BUILDDIR}"
+pdftoppm -png "../${FILENAME}" "${PDFROOT}"
+for file in *pdf_*; do
+    tesseract "${file}" "${TESSERACTBASE}${file%%.png}"
+done
+cat *text_* > whole_text.txt
+popd
+
+
+
