@@ -104,6 +104,7 @@ power_req(){
 
 
 get_font_path(){
+    echo "Getting the path to the fonts"
     line_number=$(xset q | grep -ni 'Font Path' | cut --bytes=1,2)
     # line_number=$(($line_number+1))
     # Shellcheck says we do not need $ in fron of variables for arithmetic 
@@ -111,12 +112,15 @@ get_font_path(){
     line_number=$((line_number+1))
     FONT_PATH=$(xset q | head --lines=$line_number | tail --lines=1 |\
         cut --delimiter=, --fields=1 | cut -c 1,2 --complement)
+
+    ## echo "get_font_path return code ${?}"
 }
 
 
 move_fonts_update(){
     # Move preferred font to FONT_PATH
     # TODO: Add support for local install
+    echo "Moving Fonts ..."
     sudo mv Hack-Regular.ttf "$FONT_PATH"
     if ! $GOT_FONTS;then
         sudo mv PowerlineSymbols.otf "$FONT_PATH"
@@ -141,15 +145,23 @@ test_support(){
 
 get_rep_root(){
 	# This function obtains the path to the repository-root
+    echo "[INFO] Setting REP_ROOT"
 	if "${LOCALINSTALL}"; then
+        echo "[INFO] Performing local installation"
 		REP_ROOT=$( pip3 show powerline-status | grep -i location \
 			| cut --delimiter=' ' -f 2)
-		return 0
+    else
+        REP_ROOT=$( sudo pip3 show powerline-status | grep -i location \
+            | cut --delimiter=' ' -f 2)
 	fi
-	# REP_ROOT=$("$SW" pip3 show powerline-status | grep -i location \
-	#     | cut --delimiter=' ' -f 2)
-	REP_ROOT=$( sudo pip3 show powerline-status | grep -i location \
-		| cut --delimiter=' ' -f 2)
+
+    if test -z "${REP_ROOT}"; then
+        echo "[ERROR] Critical Error REP_ROOT is empty, terminating ..."
+        return 1
+    fi
+
+    printf "[INFO] Setting REP_ROOT to %s" "${REP_ROOT}"
+
 	return 0
 }
 
@@ -160,7 +172,7 @@ update_bashrc(){
 	powerline-daemon -q
 	POWERLINE_BASH_CONTINUATION=1
 	POWERLINE_BASH_SELECT=1
-	. $REP_ROOT/powerline/bindings/bash/powerline.sh
+	. ${REP_ROOT}/powerline/bindings/bash/powerline.sh
 	####### End of powerline related config
 	_EOF_
 
@@ -222,7 +234,11 @@ fi
 # if ! "${LOCALINSTALL}";then
 # 	SW="sudo"
 # fi
-get_rep_root
+power_req &&\
+move_fonts_update &&\
+test_support &&\
+get_rep_root &&\
+update_bashrc &&\
 update_vimrc
 
 
